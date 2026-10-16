@@ -5,15 +5,16 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('hotels', '0005_category_hotel_cat'),
+        ("hotels", "0005_category_hotel_cat"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='hotel',
-            name='cat',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='hotels.category'),
+            model_name="hotel",
+            name="cat",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.PROTECT, to="hotels.category"
+            ),
         ),
     ]

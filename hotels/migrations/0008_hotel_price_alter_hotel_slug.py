@@ -4,20 +4,19 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('hotels', '0007_tagpost_hotel_tags'),
+        ("hotels", "0007_tagpost_hotel_tags"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='hotel',
-            name='price',
+            model_name="hotel",
+            name="price",
             field=models.DecimalField(decimal_places=2, default=0, max_digits=10),
         ),
         migrations.AlterField(
-            model_name='hotel',
-            name='slug',
+            model_name="hotel",
+            name="slug",
             field=models.SlugField(blank=True, max_length=255, unique=True),
         ),
     ]

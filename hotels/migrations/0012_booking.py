@@ -5,19 +5,31 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('hotels', '0011_alter_hotel_slug'),
+        ("hotels", "0011_alter_hotel_slug"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='Booking',
+            name="Booking",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('time_start', models.DateField()),
-                ('time_end', models.DateField()),
-                ('hotel', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='hotels.hotel')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("time_start", models.DateField()),
+                ("time_end", models.DateField()),
+                (
+                    "hotel",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE, to="hotels.hotel"
+                    ),
+                ),
             ],
         ),
     ]

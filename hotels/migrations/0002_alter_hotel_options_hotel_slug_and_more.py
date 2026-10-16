@@ -4,23 +4,24 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('hotels', '0001_initial'),
+        ("hotels", "0001_initial"),
     ]
 
     operations = [
         migrations.AlterModelOptions(
-            name='hotel',
-            options={'ordering': ['-time_create']},
+            name="hotel",
+            options={"ordering": ["-time_create"]},
         ),
         migrations.AddField(
-            model_name='hotel',
-            name='slug',
-            field=models.SlugField(blank=True, default='', max_length=255),
+            model_name="hotel",
+            name="slug",
+            field=models.SlugField(blank=True, default="", max_length=255),
         ),
         migrations.AddIndex(
-            model_name='hotel',
-            index=models.Index(fields=['time_create'], name='hotels_hote_time_cr_6670c1_idx'),
+            model_name="hotel",
+            index=models.Index(
+                fields=["time_create"], name="hotels_hote_time_cr_6670c1_idx"
+            ),
         ),
     ]

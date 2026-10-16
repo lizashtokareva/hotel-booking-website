@@ -4,15 +4,18 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('hotels', '0010_alter_hotel_cat'),
+        ("hotels", "0010_alter_hotel_cat"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='hotel',
-            name='slug',
-            field=models.SlugField(default='<django.db.models.fields.AutoField>.slug', max_length=255, unique=True),
+            model_name="hotel",
+            name="slug",
+            field=models.SlugField(
+                default="<django.db.models.fields.AutoField>.slug",
+                max_length=255,
+                unique=True,
+            ),
         ),
     ]

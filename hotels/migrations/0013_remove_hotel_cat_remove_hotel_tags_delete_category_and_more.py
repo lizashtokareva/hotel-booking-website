@@ -4,24 +4,23 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('hotels', '0012_booking'),
+        ("hotels", "0012_booking"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='hotel',
-            name='cat',
+            model_name="hotel",
+            name="cat",
         ),
         migrations.RemoveField(
-            model_name='hotel',
-            name='tags',
+            model_name="hotel",
+            name="tags",
         ),
         migrations.DeleteModel(
-            name='Category',
+            name="Category",
         ),
         migrations.DeleteModel(
-            name='TagPost',
+            name="TagPost",
         ),
     ]
