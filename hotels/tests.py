@@ -53,6 +53,13 @@ class BookingTests(TestCase):
         self.assertEqual(response.status_code, 400)
         self.assertEqual(Booking.objects.count(), 0)
 
+    def test_delete_booking_returns_302(self):
+        booking = Booking.objects.create(time_start='2026-10-20', time_end='2026-10-25', hotel=self.hotel)
+        url = reverse('delete_booking', kwargs={'booking_id': booking.id})
+        response = self.client.post(url)
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(Booking.objects.count(), 0)
+
 class HotelTests(TestCase):
 
     def test_wrong_price(self):
@@ -72,6 +79,24 @@ class HotelTests(TestCase):
 
         response = self.client.post(url, data={'title': '', 'price': 3000})
         self.assertEqual(response.status_code, 400)
+
+    def test_nonexistent_hotel_returns_404(self):
+        url=(reverse("hotel", kwargs={'id': 9999}))
+
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, 404)
+
+    def test_delete_hotel(self):
+        hotel = Hotel.objects.create(content = 'Тестовый отель', price=3000)
+        url = reverse('delete_hotel', kwargs={'id': hotel.id})
+
+        response = self.client.post(url)
+
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(Hotel.objects.count(), 0)
+
+
 
 
 

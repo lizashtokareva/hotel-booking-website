@@ -147,19 +147,12 @@ def show_bookings(request, hotel_id):
         if raw_start != time_start.isoformat() or raw_end != time_end.isoformat():
             return JsonResponse({"error": "Некорректный формат даты"}, status=400)
 
-        print("HOTEL", hotel.id)
-        print("TIME-START", time_start)
-        print("TIME END", time_end)
-
-        print('EXISTING BOOKINGS', list(Booking.objects.filter(hotel=hotel).values('time_start', 'time_end')))
-
 
         is_booked = Booking.objects.filter(
             hotel=hotel,
-            time_start__lt=time_end,  # Существующий въезд раньше нового выезда
-            time_end__gt=time_start # Существующий выезд позже нового въезда
-        ).exists()
-        print(is_booked)
+            time_start__lt=time_end,
+            time_end__gt=time_start)
+
         if is_booked:
             return JsonResponse({"error": "Эти даты уже заняты"}, status=400)
 
@@ -179,10 +172,11 @@ def show_bookings(request, hotel_id):
     return JsonResponse({"error": "Выбран неверный метод"}, status=405)
 
 
-def delete_booking(request, booking_id, hotel_id):
+def delete_booking(request, booking_id):
     if request.method == "POST":
-        booking = get_object_or_404(Booking, id=booking_id, hotel_id=hotel_id)
+        booking = get_object_or_404(Booking, id=booking_id)
         booking.delete()
+        hotel_id = booking.hotel_id
         return redirect("show_bookings", hotel_id=hotel_id)
 
     return JsonResponse({"error": "Выбран неверный метод"}, status=405)
