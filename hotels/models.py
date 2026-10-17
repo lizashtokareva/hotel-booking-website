@@ -20,9 +20,6 @@ class Hotel(models.Model):
     time_create = models.DateTimeField(auto_now_add=True)
     time_update = models.DateTimeField(auto_now=True)
     is_free = models.BooleanField(choices=Status.choices, default=Status.FREE)
-    slug = models.SlugField(
-        max_length=255, unique=True, db_index=True, default=f"{id}.slug"
-    )
     price = models.DecimalField(max_digits=10, decimal_places=2, default=0)
 
     objects = models.Manager()

@@ -3,8 +3,10 @@ from decimal import Decimal, InvalidOperation
 from django.db.models import Q
 from django.http import HttpResponse, HttpResponseNotFound, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
-
 from hotels.models import Booking, Hotel
+import logging
+
+logger = logging.getLogger(__name__)
 
 menu = [
     {"title": "О сайте", "url_name": "about"},
@@ -53,7 +55,7 @@ def index(request):
         "menu": menu,
         "hotel": hotel,
     }
-
+    logger.info('Открыта главная страница')
     return render(request, "hotels/index.html", context=data)
 
 
@@ -70,7 +72,7 @@ def show_hotel(request, id):
         "content": hotel.content,
         "hotel": hotel,
     }
-
+    logger.info('Пользователь открыл страницу %s', hotel)
     return render(request, "hotels/show_hotel.html", data)
 
 
@@ -83,6 +85,7 @@ def login(request):
 
 
 def page_not_found(request, exception):
+    logger.exception(exception)
     return JsonResponse({'error': 'Страница не найдена :('}, status=404)
 
 
@@ -103,6 +106,8 @@ def add_hotel(request):
             return JsonResponse({"error": "Название не может быть пустым"}, status=400)
 
         new_obj = Hotel.objects.create(title=title, content=description, price=price)
+        logger.info('Отель %s создан', title)
+        logger.exception(new_obj)
 
         return redirect("home")
 
@@ -116,8 +121,12 @@ def delete_hotel(request, id):
     if request.method == "POST":
         hotel = get_object_or_404(Hotel, id=id)
         hotel.delete()
+        logger.info('Отель %s удалён', hotel)
         return redirect("home")
 
+    logger.warning('Попытка удаления отеля id=%s методом %s',
+    id,
+    request.method)
     return JsonResponse({"error": "Метод не поддерживается"}, status=405)
 
 
@@ -139,12 +148,15 @@ def show_bookings(request, hotel_id):
             time_end = datetime.strptime(raw_end, "%Y-%m-%d").date()
 
         except (ValueError, TypeError):
+            logger.exception('Ошибка при введении даты')
             return JsonResponse({"error": "Некорректная дата"}, status=400)
 
         if time_start >= time_end:
+            logger.warning('Дата начала брони больше даты конца')
             return JsonResponse({"error": "Некорректные даты"}, status=400)
 
         if raw_start != time_start.isoformat() or raw_end != time_end.isoformat():
+            logger.warning('Некорректный формат даты бронирования для отеля %s', hotel)
             return JsonResponse({"error": "Некорректный формат даты"}, status=400)
 
 
@@ -154,21 +166,25 @@ def show_bookings(request, hotel_id):
             time_end__gt=time_start)
 
         if is_booked:
+            logger.warning('Попытка создать пересекающуюся бронь для отеля %s', hotel)
             return JsonResponse({"error": "Эти даты уже заняты"}, status=400)
 
         booking = Booking.objects.create(
             time_start=time_start, time_end=time_end, hotel=hotel
         )
-
+        logger.info('Создано бронирование %s для отеля %s', booking.id, hotel)
         return render(
             request, "hotels/show_bookings.html", {"hotel": hotel, "bookings": bookings}
         )
 
     if request.method == "GET":
+        logger.info('Открыты бронирования для отеля %s', hotel)
         return render(
             request, "hotels/show_bookings.html", {"hotel": hotel, "bookings": bookings}
         )
-
+    logger.warning('Попытка просмотра бронирования для отеля %s методом %s',
+    hotel,
+    request.method)
     return JsonResponse({"error": "Выбран неверный метод"}, status=405)
 
 
@@ -177,6 +193,10 @@ def delete_booking(request, booking_id):
         booking = get_object_or_404(Booking, id=booking_id)
         booking.delete()
         hotel_id = booking.hotel_id
+        logger.info('Удалено бронирование %s для отеля id=%s', booking_id, hotel_id)
         return redirect("show_bookings", hotel_id=hotel_id)
 
+    logger.warning('Попытка удаления бронирования %s методом %s',
+                   booking_id,
+                   request.method)
     return JsonResponse({"error": "Выбран неверный метод"}, status=405)

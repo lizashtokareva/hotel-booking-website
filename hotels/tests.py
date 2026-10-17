@@ -55,7 +55,7 @@ class BookingTests(TestCase):
 
     def test_delete_booking_returns_302(self):
         booking = Booking.objects.create(time_start='2026-10-20', time_end='2026-10-25', hotel=self.hotel)
-        url = reverse('delete_booking', kwargs={'booking_id': booking.id})
+        url = reverse('delete_booking', kwargs={'booking_id': booking.idс})
         response = self.client.post(url)
         self.assertEqual(response.status_code, 302)
         self.assertEqual(Booking.objects.count(), 0)
