@@ -23,6 +23,9 @@ python manage.py migrate
 Запуск сервера:
 python manage.py runserver
 
+Запуск тестов:
+python manage.py test hotels
+
 ## API
 
 Описание HTTP-методов и маршрутов.
