@@ -1,10 +1,11 @@
+import logging
 from datetime import datetime
 from decimal import Decimal, InvalidOperation
-from django.db.models import Q
-from django.http import HttpResponse, HttpResponseNotFound, JsonResponse
+
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
+
 from hotels.models import Booking, Hotel
-import logging
 
 logger = logging.getLogger(__name__)
 
