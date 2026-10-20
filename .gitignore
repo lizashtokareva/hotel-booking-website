@@ -9,7 +9,7 @@ venv/
 ENV/
 env.bak/
 venv.bak/
-
+.idea
 
 local_settings.py
 db.sqlite3
