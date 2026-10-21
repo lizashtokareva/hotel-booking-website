@@ -1,0 +1,7 @@
+.venv/
+djvenv/
+__pycache__/
+*.pyc
+.idea/
+.env
+db.sqlite3gi
