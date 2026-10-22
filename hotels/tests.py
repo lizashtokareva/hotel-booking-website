@@ -1,8 +1,10 @@
-from datetime import datetime, date
+from datetime import date
+
 from django.test import TestCase
 from django.urls import reverse
 
-from .models import Hotel, Booking
+from .models import Booking, Hotel
+
 
 class BookingTests(TestCase):
 
@@ -30,14 +32,14 @@ class BookingTests(TestCase):
 
     def test_booking_overlap(self):
         url = reverse('show_bookings', kwargs={'hotel_id': self.hotel.id})
-        booking = Booking.objects.create(hotel=self.hotel, time_start= '2026-10-20', time_end= '2026-10-25')
-
+        Booking.objects.create(hotel=self.hotel, time_start='2026-10-20', time_end='2026-10-25')
         cases = [('Пересечение справа', '2026-10-23', '2026-10-26'),
                  ('Пересечение слева', '2026-10-18', '2026-10-22'),
                  ('Полное совпадение', '2026-10-20', '2026-10-25'),
                  ('Полный охват', '2026-10-18', '2026-10-28'),
                  ('Полное нахождение внутри', '2026-10-21', '2026-10-4')
                  ]
+
 
         for name, start, end in cases:
             with self.subTest(case=name):
@@ -55,7 +57,7 @@ class BookingTests(TestCase):
 
     def test_delete_booking_returns_302(self):
         booking = Booking.objects.create(time_start='2026-10-20', time_end='2026-10-25', hotel=self.hotel)
-        url = reverse('delete_booking', kwargs={'booking_id': booking.id})
+        url = reverse('delete_booking', kwargs={'booking_id': booking.idс})
         response = self.client.post(url)
         self.assertEqual(response.status_code, 302)
         self.assertEqual(Booking.objects.count(), 0)
