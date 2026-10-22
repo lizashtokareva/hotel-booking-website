@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>{{ title|capfirst }}</h1>
+
+
+<ul>
+    {% for h in hotel %}
+            <li>
+                <h2>{{ h.title }}</h2>
+                <p>{{h.content | linebreaks|  truncatewords:50}}</p>
+                <a href="{{ h.get_absolute_url }}">Читать описание |</a>
+                <a href="{{ h.get_absolute_url }}">Изменить номер </a>
+                <form method="post" action="{% url 'delete_hotel' h.id %}">
+                {% csrf_token %}
+                <button type="submit">Удалить</button>
+</fo            rm>
+
+                {% if not forloop.last %}
+                <hr>
+                {%endif%}
+            </li>
+    {% endfor %}
+
+</ul>
+
+{% endblock %}
