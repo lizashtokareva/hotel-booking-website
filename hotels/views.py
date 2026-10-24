@@ -1,10 +1,13 @@
 from datetime import datetime
-from decimal import Decimal, InvalidOperation
-from django.db.models import Q
-from django.http import HttpResponse, HttpResponseNotFound, JsonResponse
-from django.shortcuts import get_object_or_404, redirect, render
+from django.http import HttpResponse, JsonResponse
+from django.shortcuts import get_object_or_404, render
+from rest_framework import generics
+from rest_framework.pagination import PageNumberPagination
+from rest_framework.response import Response
+from rest_framework.views import APIView
 
 from hotels.models import Booking, Hotel
+from hotels.serializers import BookingSerializer, HotelSerializer
 
 menu = [
     {"title": "О сайте", "url_name": "about"},
@@ -25,13 +28,59 @@ data_db = [
 ]
 
 
+class HotelAPIListPagination(PageNumberPagination):
+    page_size = 10
+    page_size_query_param = 'page_size'
+    max_page_size = 20
+
+
+
+class BookingListAPIView(APIView):
+
+    def get(self, request, hotel_id):
+        hotel = get_object_or_404(Hotel, id=hotel_id)
+        bookings = Booking.objects.filter(hotel=hotel).order_by('time_start')
+        serializer = BookingSerializer(bookings, many=True)
+
+        return Response(serializer.data)
+
+    def post(self, request, hotel_id):
+        hotel = get_object_or_404(Hotel, id=hotel_id)
+
+        serializer = BookingSerializer(
+            data=request.data,
+            context={'hotel': hotel}
+        )
+
+        serializer.is_valid(raise_exception=True)
+        serializer.save(hotel=hotel)
+
+        return Response(serializer.data, status=201)
+
+class HotelAPIList(generics.ListCreateAPIView):
+    queryset = Hotel.objects.all()
+    serializer_class = HotelSerializer
+    pagination_class = HotelAPIListPagination
+
+
+class HotelAPIUpdate(generics.RetrieveUpdateAPIView):
+    queryset = Hotel.objects.all()
+    serializer_class = HotelSerializer
+
+
+
+class HotelAPIDestroy(generics.RetrieveDestroyAPIView):
+    queryset = Hotel.objects.all()
+    serializer_class = HotelSerializer
+
+
 def index(request):
     # t = render_to_string('hotels/index.html')
 
     sort = request.GET.get("sort", "price")
     order = request.GET.get("order", "asc")
 
-    allowed_fields = ["price", "time_create"]
+    allowed_fields = ["price", "created_at"]
 
     if sort not in allowed_fields:
         return JsonResponse(
@@ -53,15 +102,17 @@ def index(request):
         "menu": menu,
         "hotel": hotel,
     }
+    if request.method == "GET":
+        return render(request, "hotels/index.html", context=data)
+    return JsonResponse({"error": "Выбранный метод не поддерживается"}, status=405)
 
-    return render(request, "hotels/index.html", context=data)
 
 
 def about(request):
     return render(request, "hotels/about.html", {"title": "О сайте", "menu": menu})
 
 
-def show_hotel(request, id):
+def hotel_details(request, id):
     hotel = get_object_or_404(Hotel, id=id)
 
     data = {
@@ -70,8 +121,11 @@ def show_hotel(request, id):
         "content": hotel.content,
         "hotel": hotel,
     }
+    if request.method == "GET":
+        return render(request, "hotels/show_hotel.html", data)
 
-    return render(request, "hotels/show_hotel.html", data)
+    return JsonResponse({"error": "Выбран неверный метод"}, status=405)
+
 
 
 def contact(request):
@@ -86,42 +140,9 @@ def page_not_found(request, exception):
     return JsonResponse({'error': 'Страница не найдена :('}, status=404)
 
 
-def add_hotel(request):
-    if request.method == "POST":
-        description = request.POST.get("content")
-        title = request.POST.get("title")
-        try:
-            price = Decimal(request.POST.get("price", ""))
-
-        except (ValueError, TypeError, InvalidOperation):
-            return JsonResponse({"error": "Цена должна быть числом"}, status=400)
-
-        if price <= 0:
-            return JsonResponse({"error": "<Цена должна быть больше нуля"}, status=400)
-
-        if not title:
-            return JsonResponse({"error": "Название не может быть пустым"}, status=400)
-
-        new_obj = Hotel.objects.create(title=title, content=description, price=price)
-
-        return redirect("home")
-
-    if request.method == "GET":
-        return render(request, "hotels/add_hotel.html")
-
-    return JsonResponse({"error": "Неверный метод"}, status=405)
 
 
-def delete_hotel(request, id):
-    if request.method == "POST":
-        hotel = get_object_or_404(Hotel, id=id)
-        hotel.delete()
-        return redirect("home")
-
-    return JsonResponse({"error": "Метод не поддерживается"}, status=405)
-
-
-def show_bookings(request, hotel_id):
+def booking_list(request, hotel_id):
     hotel = get_object_or_404(Hotel, id=hotel_id)
     bookings = (
         Booking.objects.filter(hotel_id=hotel_id)
@@ -129,7 +150,12 @@ def show_bookings(request, hotel_id):
         .values("id", "time_start", "time_end")
     )
 
-    if request.method == "POST":
+    if request.method == "GET":
+        return render(
+            request, "hotels/show_bookings.html", {"hotel": hotel, "bookings": bookings}
+        )
+
+    elif request.method == "POST":
         raw_start = request.POST.get("time_start")
         raw_end = request.POST.get("time_end")
 
@@ -151,32 +177,30 @@ def show_bookings(request, hotel_id):
         is_booked = Booking.objects.filter(
             hotel=hotel,
             time_start__lt=time_end,
-            time_end__gt=time_start)
+            time_end__gt=time_start).exists()
 
         if is_booked:
-            return JsonResponse({"error": "Эти даты уже заняты"}, status=400)
+            return JsonResponse({"error": "Эти даты уже заняты"}, status=409)
 
         booking = Booking.objects.create(
             time_start=time_start, time_end=time_end, hotel=hotel
         )
 
         return render(
-            request, "hotels/show_bookings.html", {"hotel": hotel, "bookings": bookings}
-        )
+            request, "hotels/show_bookings.html", {"hotel": hotel, "bookings": bookings})
+    return JsonResponse({"error": "Выбранный метод не поддерживается"}, status=405)
 
-    if request.method == "GET":
-        return render(
-            request, "hotels/show_bookings.html", {"hotel": hotel, "bookings": bookings}
-        )
-
-    return JsonResponse({"error": "Выбран неверный метод"}, status=405)
-
-
-def delete_booking(request, booking_id):
-    if request.method == "POST":
-        booking = get_object_or_404(Booking, id=booking_id)
+def booking_details(request, booking_id):
+    booking = get_object_or_404(Booking, id=booking_id)
+    if request.method == "DELETE":
         booking.delete()
-        hotel_id = booking.hotel_id
-        return redirect("show_bookings", hotel_id=hotel_id)
+        return HttpResponse(status=204)
 
-    return JsonResponse({"error": "Выбран неверный метод"}, status=405)
+    elif request.method == "GET":
+        return render(request, "hotels/show_booking.html", {"booking": booking})
+
+    return JsonResponse({"error": "Выбранный метод не поддерживается"}, status=405)
+
+
+
+

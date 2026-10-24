@@ -42,7 +42,7 @@ class BookingTests(TestCase):
         for name, start, end in cases:
             with self.subTest(case=name):
                 response = self.client.post(url, data= {'time_start': start, 'time_end': end})
-                self.assertEqual(response.status_code, 400)
+                self.assertEqual(response.status_code, 409)
                 self.assertEqual(Booking.objects.count(), 1)
 
     def test_create_wrong_date(self):

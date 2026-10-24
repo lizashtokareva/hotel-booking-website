@@ -1,23 +1,22 @@
 from django.contrib import admin
-from django.urls import path, register_converter
+from django.urls import path, register_converter, include
 
 from . import converters, views
+from .views import HotelAPIList
 
 register_converter(converters.FourDigitYearConverter, "year4")
 
 urlpatterns = [
     path("", views.index, name="home"),
-    path("hotel/<int:id>/", views.show_hotel, name="hotel"),
+    path("hotel/<int:id>/", views.hotel_details, name="hotel_details"),
     path("contact/", views.contact, name="contact"),
     path("login/", views.login, name="login"),
     path("about/", views.about, name="about"),
-    path("add_hotel/", views.add_hotel, name="add_hotel"),
-    path("delete_hotel/<int:id>", views.delete_hotel, name="delete_hotel"),
-    path("hotel/<int:hotel_id>/bookings/", views.show_bookings, name="show_bookings"),
-    path(
-        "bookings/<int:booking_id>/delete/", views.delete_booking, name="delete_booking"
-    ),
-    # path('edit_hotel/', views.edit_hotel, name = 'edit_hotel')
+    path("bookings/<int:booking_id>/", views.booking_details, name="booking_details"),
+
+    path('api/v1/hotellist/', HotelAPIList.as_view()),
+    path("hotel/api/<int:hotel_id>/bookings/", views.BookingListAPIView.as_view(), name="booking_list"),
+
 ]
 
 admin.site.site_header = "Панель администрации"

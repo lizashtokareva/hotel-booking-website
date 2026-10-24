@@ -1,3 +1,4 @@
+from django.contrib.auth.models import User
 from django.db import models
 from django.urls import reverse
 
@@ -17,13 +18,14 @@ class Hotel(models.Model):
     id = models.AutoField(primary_key=True)
     title = models.CharField(max_length=100)
     content = models.TextField(blank=True)
-    time_create = models.DateTimeField(auto_now_add=True)
-    time_update = models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
     is_free = models.BooleanField(choices=Status.choices, default=Status.FREE)
     slug = models.SlugField(
         max_length=255, unique=True, db_index=True, default=f"{id}.slug"
     )
     price = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    user = models.ForeignKey(User, verbose_name="Пользователь", on_delete=models.CASCADE)
 
     objects = models.Manager()
     free = FreeHotelManager()
@@ -32,11 +34,11 @@ class Hotel(models.Model):
         return self.title
 
     class Meta:
-        ordering = ["-time_create"]
-        indexes = [models.Index(fields=["time_create"])]
+        ordering = ["-created_at"]
+        indexes = [models.Index(fields=["created_at"])]
 
     def get_absolute_url(self):
-        return reverse("hotel", kwargs={"id": self.id})
+        return reverse("hotel_details", kwargs={"id": self.id})
 
 
 class Booking(models.Model):

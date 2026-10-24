@@ -4,4 +4,6 @@ __pycache__/
 *.pyc
 .idea/
 .env
-db.sqlite3gi
+db.sqlite3
+.env.*
+!.env.example
