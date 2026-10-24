@@ -3,5 +3,5 @@
 {% block content %}
 <h1>{{title}}</h1>
 <h2>{{content}}</h2>
-<li><a href="{% url 'show_bookings' hotel.id %}">Показать список бронирований</a></li>
+<li><a href="{% url 'hotel_details' hotel.id %}">Показать список бронирований</a></li>
 {% endblock %}

@@ -21,11 +21,7 @@ class Hotel(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     is_free = models.BooleanField(choices=Status.choices, default=Status.FREE)
-    slug = models.SlugField(
-        max_length=255, unique=True, db_index=True, default=f"{id}.slug"
-    )
     price = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-    user = models.ForeignKey(User, verbose_name="Пользователь", on_delete=models.CASCADE)
 
     objects = models.Manager()
     free = FreeHotelManager()

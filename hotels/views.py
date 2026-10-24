@@ -3,6 +3,7 @@ from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, render
 from rest_framework import generics
 from rest_framework.pagination import PageNumberPagination
+from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -62,12 +63,9 @@ class HotelAPIList(generics.ListCreateAPIView):
     serializer_class = HotelSerializer
     pagination_class = HotelAPIListPagination
 
-
 class HotelAPIUpdate(generics.RetrieveUpdateAPIView):
     queryset = Hotel.objects.all()
     serializer_class = HotelSerializer
-
-
 
 class HotelAPIDestroy(generics.RetrieveDestroyAPIView):
     queryset = Hotel.objects.all()
