@@ -71,6 +71,9 @@ class HotelAPIDestroy(generics.RetrieveDestroyAPIView):
     queryset = Hotel.objects.all()
     serializer_class = HotelSerializer
 
+class BookingAPIDestroy(generics.RetrieveDestroyAPIView):
+    queryset = Booking.objects.all()
+    serializer_class = BookingSerializer
 
 def index(request):
     # t = render_to_string('hotels/index.html')
